@@ -1,7 +1,7 @@
 #!/bin/bash
 
 IMAGE_TAG=$(date +"%y.%m.%d")
-IMAGE_NAME=org.tecris/molecule6:${IMAGE_TAG}
+IMAGE_NAME=org.tecris/molecule:${IMAGE_TAG}
 
 docker buildx build \
     --no-cache \
