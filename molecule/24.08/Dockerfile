@@ -7,7 +7,7 @@ COPY --from=docker:dind /usr/local/bin/docker /usr/local/bin/
 RUN python3 -m pip install \
     --no-cache-dir \
     molecule==24.8.0 \
-    ansible-core==2.16 \
+    ansible-core==2.17 \
     pytest-testinfra[ansible] \
     molecule-plugins[docker]
 
