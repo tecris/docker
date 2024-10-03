@@ -2,15 +2,19 @@ services:
   alhambra:
     container_name: alhambra
     image: org.tecris/ssh-host:23.05.16
+    hostname: alhambraone
 
   cordoba:
     container_name: cordoba
     image: org.tecris/ssh-host:23.05.16
+    hostname: cordobaone
 
   sevilla:
     container_name: sevilla
     image: org.tecris/ssh-user:23.05.16
+    hostname: sevillaone
 
   toledo:
     container_name: toledo
     image: org.tecris/ssh-host:23.05.16
+    hostname: toledoone
