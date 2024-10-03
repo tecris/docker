@@ -10,7 +10,7 @@ docker run -v volume_zero:/keys org.tecris/ssh:${TAG} ssh-keygen -b 4096 -t rsa 
 docker run -v volume_zero:/keys org.tecris/ssh:${TAG} ssh-keygen -b 4096 -t rsa -f /keys/host_ca -C "CA key for host" -q -N ""
 docker run -v volume_zero:/keys org.tecris/ssh:${TAG} ls -l /keys
 
-docker run --name volume_helper -d -v volume_zero:/keys busybox:1.36 true
+docker run --name volume_helper -d -v volume_zero:/keys busybox:1.37 true
 docker cp volume_helper:/keys .
 
 ./build_host_image.sh ${TAG}
