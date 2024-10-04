@@ -5,8 +5,8 @@
 docker volume create --name volume_zero
 docker run -v volume_zero:/keys org.tecris/ssh:23.05.16 rm -rf /keys/*
 
-docker run -v volume_zero:/keys org.tecris/ssh:23.05.16 ssh-keygen -b 4096 -t ed25519 -f /keys/user_ca -C "CA key for user" -q -N ""
-docker run -v volume_zero:/keys org.tecris/ssh:23.05.16 ssh-keygen -b 4096 -t ed25519 -f /keys/host_ca -C "CA key for host" -q -N ""
+docker run -v volume_zero:/keys org.tecris/ssh:23.05.16 ssh-keygen -t ed25519 -f /keys/user_ca_key -C "CA key for user" -q -N ""
+docker run -v volume_zero:/keys org.tecris/ssh:23.05.16 ssh-keygen -t ed25519 -f /keys/host_ca_key -C "CA key for host" -q -N ""
 docker run -v volume_zero:/keys org.tecris/ssh:23.05.16 ls -l /keys
 
 docker run --name volume_helper -d -v volume_zero:/keys busybox:1.37 true
@@ -30,7 +30,7 @@ docker exec -it -u django sevilla ssh pegasus@alhambra
 docker exec -it -u django sevilla ssh pegasus@cordoba
 docker exec -it -u django sevilla ssh pegasus@toledo
 
-
+ssh-keygen -L -f id_ecdsa-cert.pub
 
 Reference:
 https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/6/html/deployment_guide/sec-creating_ssh_ca_certificate_signing-keys
@@ -45,3 +45,47 @@ https://www.lorier.net/docs/ssh-ca.html
 
 
 https://medium.com/better-programming/how-to-use-ssh-certificates-for-scalable-secure-and-more-transparent-server-access-720a87af6617
+
+
+When an SSH client opens an SSH connection to an SSH server, there are a couple of trust issues to resolve. 
+ * he server needs to know whether this is truly an authorized client, and,
+ * the client needs to know whether the server is truly the server it claims to be.
+
+Problem is solved by using CA that is trusted by both client/user and server.
+
+How the server knows this is an authorized client?
+1. Create User CA
+ 1.1 ssh-keygen -t ed25519 -f /keys/user_ca_key -C "CA key for user" -q -N ""
+2, User public key gets signed with User CA (issue user certificate)
+ 2.1 ssh-keygen -s user_ca \
+      -I "user_name" \
+      -n userid1 \
+      -V +52w \
+      id_ed25519.pub
+      Explanation: This will create a file id_ed25519_key-cert.pub (mind the -cert before .pub) that has to be copied in $HOME/.ssh/id_ed25519-cert.pub
+3. Server trusts User CA
+ 3.1 Copy USER CA public key to server, for instance `/etc/ssh/user_ca_key.pub`, and,
+ 3.2 configure ssh server, add following line "TrustedUserCAKeys /etc/ssh/user_ca_key.pub" in /etc/ssh/sshd_config
+ 3.3 restart sshd server
+4. Client presents certificate to server
+5. Server provides access if certificate is valid
+
+How the client knows the server is truly the server it claims to be?
+1. Create Host CA
+ 1.1 ssh-keygen -t ed25519 -f /keys/host_ca_key -C "CA key for host" -q -N ""
+2. Configure user to trust Host CA
+ 2.1 add line `@cert-authority *.example.com ssh-ed25519 AAAA...` to either
+  2.1.1 `/etc/ssh/ssh_known_hosts` (for system-wide trust), or,
+  2.1.2 `$HOME/.ssh/ssh_known_hosts` (for individual trust)
+3. Configure host
+ 3.1 Create host certificate
+  3.1.1 ssh-keygen -s host_ca \
+            -I "ServerMachine1" \
+            -h \
+            -n ServerMachine1.example.com \
+            -V +52w \
+            ssh_host_ed25519_key.pub
+ 3.2 Configure sshd to offer the certificate to all in coming SSH connections
+  3.1 Edit file /etc/ssh/sshd_config and add the following line
+    `HostCertificate /etc/ssh/ssh_host_ed25519_key-cert.pub`
+  3.2 Restart SSH server

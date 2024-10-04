@@ -3,23 +3,24 @@ FROM org.tecris/ssh:${TAG}
 
 WORKDIR /root
 
-ADD keys/host_ca .
+ADD keys/host_ca_key .
 
 # issue host certificate
 # -h this is a host key (and not a user key)
-# -n used to identify which hosts will be authenticated using the host_ca
+# -n used to identify which hosts will be authenticated using the host_ca_key
 # -I comment
-RUN ssh-keygen -s ./host_ca \
+RUN ssh-keygen -s ./host_ca_key \
     -h \
     -n alhambra,cordoba \
     -V +52w \
     -I alhambra-key \
     /etc/ssh/ssh_host_ed25519_key.pub
 
+# SSH server to offer the certificate to all incoming SSH connections
 RUN echo "HostCertificate /etc/ssh/ssh_host_ed25519_key-cert.pub" | tee -a /etc/ssh/sshd_config
 
 # in order for this server to trust user certificates issued by the User CA we need to add the User CA
-ADD keys/user_ca.pub /etc/ssh/
-RUN echo "TrustedUserCAKeys /etc/ssh/user_ca.pub" | tee -a /etc/ssh/sshd_config
+ADD keys/user_ca_key.pub /etc/ssh/
+RUN echo "TrustedUserCAKeys /etc/ssh/user_ca_key.pub" | tee -a /etc/ssh/sshd_config
 
 ENTRYPOINT ["/usr/sbin/sshd","-D","-e"]
