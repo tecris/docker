@@ -5,10 +5,11 @@ WORKDIR /home/django
 
 USER django
 
-RUN ssh-keygen -f /home/django/.ssh/id_rsa -N ""
+# RUN ssh-keygen -f /home/django/.ssh/id_rsa -N ""
+RUN ssh-keygen -N '' -t ed25519 -C "user@org" -f /home/django/.ssh/id_ed25519
 ADD --chown=django:django keys/user_ca .
 # Sign django's key so it can log in as root, rango and django:
-RUN ssh-keygen -s /home/django/user_ca -V +52w -n root,rango,django -I rango-key1 -z 1 .ssh/id_rsa.pub
+RUN ssh-keygen -s /home/django/user_ca -V +52w -n root,rango,django -I rango-key1 -z 1 .ssh/id_ed25519.pub
 
 ADD keys/host_ca.pub .
 RUN echo "@cert-authority alhambra,cordoba $(cat /home/django/host_ca.pub)" >> /home/django/.ssh/known_hosts

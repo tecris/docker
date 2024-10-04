@@ -7,7 +7,7 @@ set -ex
 # or
 #  docker run -e "JENKINS_AGENT_SSH_PUBKEY=<public key>" jenkinsci/ssh-slave
 
-ssh-keygen -b 4096 -t rsa -f /root/ssh-ca -C "CA key for cristea.org" -q -N ""
+ssh-keygen -N '' -t ed25519 -f /root/ssh-ca -C "CA key for cristea.org"
 cp /root/ssh-ca.pub /etc/ssh/
 ls -l . 
 cat /root/ssh-ca.pub
@@ -17,9 +17,9 @@ ssh-keygen -s /root/ssh-ca \
     -h -n jenkins \
     -V +52w \
     -I jenkins-key \
-    /etc/ssh/ssh_host_rsa_key.pub
+    /etc/ssh/ssh_host_ed25519_key.pub
 
-echo "HostCertificate /etc/ssh/ssh_host_rsa_key-cert.pub" | tee -a /etc/ssh/sshd_config
+echo "HostCertificate /etc/ssh/ssh_host_ed25519_key-cert.pub" | tee -a /etc/ssh/sshd_config
 echo "TrustedUserCAKeys /etc/ssh/ssh-ca.pub" | tee -a /etc/ssh/sshd_config
 
 # Generate jenkins key:

@@ -14,9 +14,9 @@ RUN ssh-keygen -s ./host_ca \
     -n alhambra,cordoba \
     -V +52w \
     -I alhambra-key \
-    /etc/ssh/ssh_host_rsa_key.pub
+    /etc/ssh/ssh_host_ed25519_key.pub
 
-RUN echo "HostCertificate /etc/ssh/ssh_host_rsa_key-cert.pub" | tee -a /etc/ssh/sshd_config
+RUN echo "HostCertificate /etc/ssh/ssh_host_ed25519_key-cert.pub" | tee -a /etc/ssh/sshd_config
 
 # in order for this server to trust user certificates issued by the User CA we need to add the User CA
 ADD keys/user_ca.pub /etc/ssh/
