@@ -32,6 +32,9 @@ docker exec -it -u django sevilla ssh pegasus@toledo
 
 ssh-keygen -L -f id_ecdsa-cert.pub
 
+how to check if public/private key match
+diff <(ssh-keygen -y -e  -f keys/user_ca_key) <(ssh-keygen -y -e  -f keys/user_ca_key.pub)
+
 Reference:
 https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/6/html/deployment_guide/sec-creating_ssh_ca_certificate_signing-keys
 https://dev.to/gvelrajan/how-to-configure-and-setup-ssh-certificates-for-ssh-authentication-b52
